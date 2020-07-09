@@ -8,6 +8,7 @@ const ENDPOINT = "/media";
 const FIELDS = "id,caption,permalink,media_type,media_url,thumbnail_url";
 
 let lastW = window.outerHeight;
+let init = false;
 
 function detectWindowResize() {
 
@@ -48,6 +49,38 @@ export default class extends React.Component {
 
   }
 
+  initCalc() {
+
+	const numSlides = Math.floor(
+		(document.documentElement.clientWidth-100)/this.props.configuration.portletInstance.imageswidth
+		 ) === 0 ? 1 :
+		 Math.floor(
+		 (document.documentElement.clientWidth-100)/this.props.configuration.portletInstance.imageswidth
+		) > this.props.configuration.portletInstance.slides ? this.props.configuration.portletInstance.slides :
+		Math.floor(
+			(document.documentElement.clientWidth-100)/this.props.configuration.portletInstance.imageswidth
+		   )		
+		;
+
+	if (numSlides === 1) {
+	
+		document.querySelector('.instagram-carousel').classList.add('instagram-carousel-responsive');
+		document.querySelectorAll('.instagram-captions').forEach(x=>x.classList.add('instagram-captions-responsive'));
+	}
+
+	document.documentElement.style.setProperty("--carousel-width",
+	(this.props.configuration.portletInstance.imageswidth*numSlides)+'px');
+
+	console.log("nums: ", numSlides);
+	console.log("w:", (this.props.configuration.portletInstance.imageswidth*numSlides)+'px');
+	this.setState({ 
+		slides: numSlides
+	});
+
+	init = true;
+
+  }
+
   calcularSize() {
 
     let numSlides = parseInt(this.state.slides);
@@ -58,55 +91,64 @@ export default class extends React.Component {
 
 			document.getElementsByTagName("body")[0].style.backgroundColor = "green";
 		
-		if ((document.documentElement.clientWidth > carouselWidth) 
-			&& this.props.configuration.portletInstance.slides != "1") {
-			console.log("ok1");
+			if ((document.documentElement.clientWidth > carouselWidth) 
+				&& this.props.configuration.portletInstance.slides != "1") {
+				console.log("ok1");
 
-			if (this.state.slides >= this.props.configuration.portletInstance.slides) return;
+				if (this.state.slides >= this.props.configuration.portletInstance.slides) return;
 
-			document.documentElement.style.setProperty("--carousel-width",
-			parseInt(this.props.configuration.portletInstance.imageswidth)*(numSlides+1)+'px');
+				document.querySelector('.instagram-carousel').classList.remove('instagram-imagenes-responsive');
+				document.querySelectorAll('[name=instagram-imagenes]').forEach(x=>x.classList.remove('instagram-imagenes-responsive'));
+				document.querySelectorAll('.instagram-captions').forEach(x=>x.classList.remove('instagram-captions-responsive'));
 
-			this.setState({ 
-			slides: numSlides+1
-			});
-	
-		} else if ((document.documentElement.clientWidth > carouselWidth) && this.props.configuration.portletInstance.slides == "1") {
-			document.documentElement.style.setProperty('--carousel-width', 
-			document.documentElement.style.getPropertyValue("--photo-width"));
-			this.setState({ 
-				slides: "1"
+				document.documentElement.style.setProperty("--carousel-width",
+				parseInt(this.props.configuration.portletInstance.imageswidth)*(numSlides+1)+'px');
+
+				this.setState({ 
+				slides: numSlides+1
 				});
-		}
+		
+			} else if ((document.documentElement.clientWidth > carouselWidth) && this.props.configuration.portletInstance.slides == "1") {
+				document.documentElement.style.setProperty('--carousel-width', 
+				document.documentElement.style.getPropertyValue("--photo-width"));
+				this.setState({ 
+					slides: "1"
+				});
+			}
 
 		} else {
 
-		document.getElementsByTagName("body")[0].style.backgroundColor = "red";
-		let carouselWidth = (parseInt(document.documentElement.style.getPropertyValue("--photo-width")) * numSlides) + 100;
-		console.log(document.documentElement.clientWidth, carouselWidth, typeof this.props.configuration.portletInstance.slides, this.props.configuration.portletInstance.slides);
+			document.getElementsByTagName("body")[0].style.backgroundColor = "red";
+			let carouselWidth = (parseInt(document.documentElement.style.getPropertyValue("--photo-width")) * numSlides) + 100;
+			console.log(document.documentElement.clientWidth, carouselWidth, typeof this.props.configuration.portletInstance.slides, this.props.configuration.portletInstance.slides);
 
-		if (document.documentElement.clientWidth < carouselWidth) {
-			console.log("ok2");
+			if (document.documentElement.clientWidth < carouselWidth) {
+				console.log("ok2");
 
-			if (this.props.configuration.portletInstance.slides != "1") {
+				if (this.props.configuration.portletInstance.slides != "1") {
 
-				if (this.state.slides <= 1) return;
+					if (this.state.slides <= 1) return;
 
-				document.documentElement.style.setProperty("--carousel-width",
-				parseInt(this.props.configuration.portletInstance.imageswidth)*(numSlides-1)+'px');	
+					document.documentElement.style.setProperty("--carousel-width",
+					parseInt(this.props.configuration.portletInstance.imageswidth)*(numSlides-1)+'px');
 
-			this.setState({ 
-				slides: numSlides-1
-				});
+					if (numSlides === 2) {
+						document.querySelector('.instagram-carousel').classList.add('instagram-carousel-responsive');
+						document.querySelectorAll('[name=instagram-imagenes]').forEach(x=>x.classList.add('instagram-imagenes-responsive'));
+						document.querySelectorAll('.instagram-captions').forEach(x=>x.classList.add('instagram-captions-responsive'));
+					}
+
+					this.setState({ 
+						slides: numSlides-1
+						});
 
 			} else if (this.state.slides == "1") {
+
 				this.setState({ 
 					slides: 1
 					});
 			}
 
-
-	
 		}
 
 	}
@@ -144,7 +186,7 @@ export default class extends React.Component {
 
 	document.documentElement.style.setProperty('--carousel-width', parseInt(this.props.configuration.portletInstance.imageswidth)*parseInt(this.props.configuration.portletInstance.slides)+'px');
 
-	this.calcularSize();
+	if (!init) this.initCalc();
 
 	};
 
@@ -210,7 +252,6 @@ export default class extends React.Component {
             }
           </Slider>
         </div>
-        {/*JSON.stringify(this.props.configuration)*/}
       </div>
 		<AppendHead>
 			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css" />
@@ -220,28 +261,3 @@ export default class extends React.Component {
     );
   }
 }
-
-/*
-	render() {
-		return (
-            <div>
-				<div>
-        	        <span className="tag">{Liferay.Language.get('portlet-namespace')}:</span>
-					<span className="value">{this.props.portletNamespace}</span>
-				</div>
-				<div>
-    	            <span className="tag">{Liferay.Language.get('context-path')}:</span>
-					<span className="value">{this.props.contextPath}</span>
-				</div>
-				<div>
-	                <span className="tag">{Liferay.Language.get('portlet-element-id')}:</span>
-					<span className="value">{this.props.portletElementId}</span>
-				</div>
-				<div>
-					<span className="tag">{Liferay.Language.get('configuration')}:</span>
-					<span className="value pre">{JSON.stringify(this.props.configuration, null, 2)}</span>
-				</div>
-			</div>
-		);
-	}
-*/
