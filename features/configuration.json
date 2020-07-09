@@ -1,0 +1,61 @@
+{
+	"$schema": "https://raw.githubusercontent.com/liferay/liferay-js-toolkit/master/resources/schemas/configuration.schema.json",
+	"system": {
+		"category": "liferay-instagram-basic-display",
+		"name": "liferay-instagram-basic-display",
+		"fields": {
+			"userid": {
+				"type": "string",
+				"name": "userid",
+				"description": "userid-help",
+				"default": ""
+			},
+			"token": {
+				"type": "string",
+				"name": "token",
+				"description": "token-help",
+				"default": ""
+			}
+		}
+	},
+	"portletInstance": {
+		"fields": {
+			"userid": {
+				"type": "string",
+				"name": "userid",
+				"description": "userid-help",
+				"default": ""
+			},
+			"token": {
+				"type": "string",
+				"name": "token",
+				"description": "token-help",
+				"default": ""
+			},
+			"imageswidth": {
+				"type": "string",
+				"name": "imageswidth",
+				"description": "imageswidth-help",
+				"default": "240"
+			},
+			"imagesheight": {
+				"type": "string",
+				"name": "imagesheight",
+				"description": "imagesheight-help",
+				"default": "240"
+			},
+			"fontsize": {
+				"type": "string",
+				"name": "fontsize",
+				"description": "fontsize-help",
+				"default": "16"
+			},
+			"slides": {
+				"type": "string",
+				"name": "slides",
+				"description": "slides-help",
+				"default": "3"
+			}
+		}
+	}
+}

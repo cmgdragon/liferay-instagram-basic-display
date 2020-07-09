@@ -1,0 +1,90 @@
+:root{
+	--carousel-width: 720px;
+	--photo-width: 240px;
+	--photo-height: 240px;
+	--fuente: 16px;
+	--caption-width: 240px;
+  }
+
+[id^=portlet_liferayinstagrambasicdisplay] .portlet-content {
+	margin-bottom: 2.2rem;
+}
+
+#foto-slides, .slick-slide {
+	max-width: var(--photo-width);
+	width: var(--photo-width);
+}
+
+.slick-track {
+    display: flex !important;
+    justify-content: center;
+    height: 100%;
+}
+
+#instagram-content {
+	display: flex !important;
+    justify-content: center;
+}
+
+#foto-slides {
+	background-color: rgba(0, 0, 0, .5);
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 5;
+}
+
+.instagram-carousel {
+	height: var(--photo-height);
+	width: var(--carousel-width);
+
+  }
+  
+  .instagram-enlaces {
+	max-width: var(--photo-width);
+	
+  }
+
+  [name=instagram-imagenes] {
+	width: var(--photo-width);
+	object-fit: cover;
+	-o-object-fit: cover;
+	filter: brightness(.8);
+	margin: 0;
+	transition: all ease .3s;
+	height: var(--photo-height);
+  }
+
+  .instagram-captions {
+	color: white;
+	font-weight: bold;
+	position: absolute;
+	z-index: 10;
+	bottom: 20px;
+	max-width: var(--caption-width);
+	font-size: var(--fuente);
+  }
+
+  .caption-align{
+	display: flex;
+	justify-content: flex-start;
+	padding-left: .4em;
+  }
+
+  .icono-album {
+	  display: flex;
+	  justify-content: flex-end;
+	  margin-right: .6em;
+  }
+
+  .hovered {
+	filter:  brightness(.4);
+  }
+
+.icono-album > svg {
+    position: absolute;
+    width: 1.4em;
+    z-index: 20;
+	color: white;
+    margin-top: .6em;
+  }
