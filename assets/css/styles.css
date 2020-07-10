@@ -76,7 +76,7 @@
   }
 
   .instagram-captions-responsive {
-    max-width: min-content;
+   /* max-width: min-content;*/
   }
 
   .caption-align{
@@ -85,20 +85,47 @@
 	padding-left: .4em;
   }
 
-  .icono-album {
+  .instagram-icono-album {
 	  display: flex;
 	  justify-content: flex-end;
 	  margin-right: .6em;
   }
 
+  .instagram-icono-album:hover {
+	cursor: pointer;
+}
+
   .hovered {
 	filter:  brightness(.4);
   }
 
-.icono-album > svg {
+.instagram-icono-album > svg {
     position: absolute;
     width: 1.4em;
     z-index: 20;
 	color: white;
     margin-top: .6em;
   }
+
+#instagram-album-popup {
+	background-color: black;
+    position: absolute;
+    z-index: 999;
+    top: -100vh;
+    left: -100vw;
+    bottom: -100vh;
+	right: -100vw;
+	transition: all ease-in .5s;
+	display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.instagram-album-carousel-show {
+	display: flex !important;
+	background-color: rgba(0, 0, 0, .7) !important;
+}
+
+#instagram-album-carousel {
+	width: var(--photo-width);
+}

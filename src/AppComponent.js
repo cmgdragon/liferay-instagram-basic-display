@@ -4,8 +4,10 @@ import AppendHead from 'react-append-head';
 import 'babel-polyfill';
 
 const API_HOST = "https://graph.instagram.com/";
-const ENDPOINT = "/media";
-const FIELDS = "id,caption,permalink,media_type,media_url,thumbnail_url";
+const ENDPOINT_MEDIA = "/media";
+const ENDPOINT_CHILDREN = "/children";
+const FIELDS_MEDIA = "id,caption,permalink,media_type,media_url,thumbnail_url";
+const FIELDS_CHILDREN = "permalink,media_url,thumbnail_url";
 
 let lastW = window.outerHeight;
 let init = false;
@@ -19,23 +21,10 @@ function detectWindowResize() {
       return true;
    } else {
      lastW = x;
-     return false
+     return false;
     }
 
 }
-
-class Album extends React.Component {
-
-  render() {
-    return (
-      <div className="icono-album">
-      <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="images" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path fill="currentColor" d="M480 416v16c0 26.51-21.49 48-48 48H48c-26.51 0-48-21.49-48-48V176c0-26.51 21.49-48 48-48h16v208c0 44.112 35.888 80 80 80h336zm96-80V80c0-26.51-21.49-48-48-48H144c-26.51 0-48 21.49-48 48v256c0 26.51 21.49 48 48 48h384c26.51 0 48-21.49 48-48zM256 128c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-96 144l55.515-55.515c4.686-4.686 12.284-4.686 16.971 0L272 256l135.515-135.515c4.686-4.686 12.284-4.686 16.971 0L512 208v112H160v-48z"></path></svg>
-      </div>
-    );
-  }
-
-}
-
 
 export default class extends React.Component {
 
@@ -44,7 +33,8 @@ export default class extends React.Component {
     super();
     this.state = {
       fotos: [],
-      slides: "3"
+	  slides: "3",
+	  popup: false
      }
 
   }
@@ -89,7 +79,7 @@ export default class extends React.Component {
 			let carouselWidth = (parseInt(document.documentElement.style.getPropertyValue("--photo-width")) * numSlides) + 300;
 			console.log(document.documentElement.clientWidth, carouselWidth, typeof this.props.configuration.portletInstance.slides, this.props.configuration.portletInstance.slides);
 
-			document.getElementsByTagName("body")[0].style.backgroundColor = "green";
+			//document.getElementsByTagName("body")[0].style.backgroundColor = "green";
 		
 			if ((document.documentElement.clientWidth > carouselWidth) 
 				&& this.props.configuration.portletInstance.slides != "1") {
@@ -118,7 +108,7 @@ export default class extends React.Component {
 
 		} else {
 
-			document.getElementsByTagName("body")[0].style.backgroundColor = "red";
+			//document.getElementsByTagName("body")[0].style.backgroundColor = "red";
 			let carouselWidth = (parseInt(document.documentElement.style.getPropertyValue("--photo-width")) * numSlides) + 100;
 			console.log(document.documentElement.clientWidth, carouselWidth, typeof this.props.configuration.portletInstance.slides, this.props.configuration.portletInstance.slides);
 
@@ -161,7 +151,7 @@ export default class extends React.Component {
 
 	console.log(this.props.configuration);
 	const getInstagramPosts = async () => {
-	const response = await fetch(`${API_HOST}${this.props.configuration.portletInstance.userid === "" ? this.props.configuration.system.userid : this.props.configuration.portletInstance.userid}${ENDPOINT}?fields=${FIELDS}&access_token=${this.props.configuration.portletInstance.token === "" ? this.props.configuration.system.token : this.props.configuration.portletInstance.token}`
+	const response = await fetch(`${API_HOST}${this.props.configuration.portletInstance.userid === "" ? this.props.configuration.system.userid : this.props.configuration.portletInstance.userid}${ENDPOINT_MEDIA}?fields=${FIELDS_MEDIA}&access_token=${this.props.configuration.portletInstance.token === "" ? this.props.configuration.system.token : this.props.configuration.portletInstance.token}`
 	);
 
 	const fotos = await response.json();
@@ -196,6 +186,28 @@ export default class extends React.Component {
 
   }
 
+  async albumButton(media_id) {
+
+	console.log("n", this.state.popup);
+
+	const response = await fetch(`${API_HOST}${media_id}${ENDPOINT_CHILDREN}?fields=${FIELDS_CHILDREN}&access_token=${this.props.configuration.portletInstance.token === "" ? this.props.configuration.system.token : this.props.configuration.portletInstance.token}`);
+	const data = await response.json();
+	console.log(data);
+
+	this.setState({ popup: data });
+
+	document.getElementById("instagram-album-popup").classList.add("instagram-album-carousel-show");
+	//document.getRootNode().addEventListener("click", this.hideAlbum);  PONER ICONO CERRAR
+
+}
+
+  hideAlbum() {
+	document.getElementById("instagram-album-popup").classList.remove("instagram-album-carousel-show");
+  }
+
+  /*showAlbum() {}
+  hideAlbum() {}*/
+
   hoveredItemEnter(e) {
     if (e.target.localName === "span")
       e.target.parentNode.nextSibling.style.filter = "brightness(.4)";
@@ -213,25 +225,40 @@ export default class extends React.Component {
 
   render() {
   
-    let settings = {
+    const settings = {
       dots: true,
-      infinite: true,
-      speed: 500,
+	  infinite: true,
+	  autoplay: true,
+	  autoplaySpeed: 5000,
+	  speed: 500,
+	  arrows: false,
       slidesToShow: parseInt(this.state.slides),
       slidesToScroll: 1,
       responsive: [
         {
           breakpoint: parseInt(this.props.configuration.portletInstance.imageswidth),
           settings: {
-            slidesToShow: 1,
+			slidesToShow: 1,
+			arrows: false,
+			autoplay: true,
+			autoplaySpeed: 5000,
             slidesToScroll: 1,
             infinite: true,
             dots: true
           }
         }
       ]
-    };
+	};
+	
+	const popup_settings = {
+		dots: false,
+		infinite: true,
+		speed: 500,
+		slidesToShow: 1,
+		slidesToScroll: 1,
+	};
 
+	console.log("dataa", this.state.popup.data);
     return (
       <div>
       <div id="instagram-content">
@@ -241,7 +268,11 @@ export default class extends React.Component {
               this.state.fotos.map((post, index) => {
                 return (
                   <div key={index} className="foto-slides">
-                    {post.media_type === "CAROUSEL_ALBUM" ? <Album /> : ""}
+                    {post.media_type === "CAROUSEL_ALBUM" ? 
+						<div onClick={()=> this.albumButton(post.id)} className="instagram-icono-album">
+							<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="images" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path fill="currentColor" d="M480 416v16c0 26.51-21.49 48-48 48H48c-26.51 0-48-21.49-48-48V176c0-26.51 21.49-48 48-48h16v208c0 44.112 35.888 80 80 80h336zm96-80V80c0-26.51-21.49-48-48-48H144c-26.51 0-48 21.49-48 48v256c0 26.51 21.49 48 48 48h384c26.51 0 48-21.49 48-48zM256 128c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-96 144l55.515-55.515c4.686-4.686 12.284-4.686 16.971 0L272 256l135.515-135.515c4.686-4.686 12.284-4.686 16.971 0L512 208v112H160v-48z"></path></svg>
+						</div>
+					 : ""}
                     <a className="instagram-enlaces" href={post.permalink} onMouseOver={this.hoveredItemEnter} onMouseLeave={this.hoveredItemLeave}>
                       <div className="caption-align"><span className="instagram-captions">{post.caption}</span></div>
                       <img name="instagram-imagenes" className={this.state.hovered ? "hovered" : ""} src={post.media_type === "VIDEO" ? post.thumbnail_url : post.media_url} />
@@ -257,6 +288,29 @@ export default class extends React.Component {
 			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css" />
 			<link rel="stylesheet" charSet="UTF-8" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css" />
 		</AppendHead>
+	<div id="instagram-album-popup">
+		{
+			this.state.popup !== false ? 
+			
+			<div id="instagram-album-carousel" onClick={()=>this.hideAlbum}>
+				<Slider {...popup_settings}>
+				{
+					Array.from(this.state.popup.data).map((o, index) => {
+						console.log("p", o);
+						return (
+						<div key={index}>
+							<img name="instagram-imagenes" src={o.media_url} />
+						</div>
+						);
+					})
+				}
+				</Slider>
+			</div>
+			
+			: ""
+		}
+	</div>
+
       </div>
     );
   }
