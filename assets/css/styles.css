@@ -91,9 +91,9 @@
 	  margin-right: .6em;
   }
 
-  .instagram-icono-album:hover {
+  /*.instagram-icono-album:hover {
 	cursor: pointer;
-}
+}*/
 
   .hovered {
 	filter:  brightness(.4);
@@ -128,4 +128,19 @@
 
 #instagram-album-carousel {
 	width: var(--photo-width);
+}
+
+#instagram-album-popup-close {
+	position: absolute;
+    width: 1.4em;
+    z-index: 20;
+    color: white;
+    margin-top: .6em;
+    top: 100vh;
+    right: 110vw;
+}
+
+#instagram-album-popup-close:hover, .instagram-icono-album > svg:hover {
+	opacity: .7;
+	cursor: pointer;
 }
