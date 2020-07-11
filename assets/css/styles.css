@@ -110,12 +110,12 @@
 #instagram-album-popup {
 	background-color: rgba(0, 0, 0, 0);
     position: absolute;
-    z-index: 999;
+    z-index: 100;
     left: 0;
     bottom: 0;
-	right: 0;
-	top: 0;
-	display: none;
+    right: 0;
+    top: 0;
+    display: none;
     align-items: center;
     justify-content: center;
 }
@@ -134,7 +134,8 @@
 }
 
 .instagram-album-carousel-responsive {
-	width: 50vw !important;
+  width: 50vw !important;
+  max-width: var(--photo-width);
 }
 
 #instagram-album-popup-close {
@@ -162,5 +163,6 @@
   }
 
   .instagram-album-imagenes-responsive {
-	  width: 50vw !important;
+    width: 50vw !important;
+    max-width: var(--photo-width);
   }

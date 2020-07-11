@@ -57,10 +57,14 @@
 				"default": "3"
 			},
 			"showcaptions": {
-				"type": "boolean",
+				"type": "string",
 				"name": "showcaptions",
 				"description": "showcaptions-help",
-				"default": "true"
+				"default": "show",
+				"options": {
+					"show": "Show",
+					"hide": "Hide"
+				}
 			}
 		}
 	}

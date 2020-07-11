@@ -29,13 +29,14 @@ function detectWindowResize() {
 
 class Captions extends React.Component {
 	render() {
-		const captionLength = 55;
+		const captionLength = 50;
+		console.log("c", this.props.caption.length, this.props.showCaption, typeof this.props.showCaption);
 		return (
 			<div className="caption-align"><span className="instagram-captions">
 				{
-					this.props.showCaption ?
-					this.props.caption.length > captionLength ? this.props.caption.substring(0 , captionLength)+"..." : this.props.caption
-					: ""
+					this.props.showCaption === "Show" ?
+						this.props.caption.length > captionLength ? this.props.caption.substring(0, captionLength) + "..." : this.props.caption
+						: ""
 				}
 			</span></div>
 		);
