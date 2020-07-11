@@ -8,6 +8,7 @@ const ENDPOINT_MEDIA = "/media";
 const ENDPOINT_CHILDREN = "/children";
 const FIELDS_MEDIA = "id,caption,permalink,media_type,media_url,thumbnail_url";
 const FIELDS_CHILDREN = "permalink,media_url,thumbnail_url";
+const componentQuery = "[id^=portlet_liferayinstagrambasicdisplay]";
 
 let lastW = window.outerHeight;
 let init = false;
@@ -26,6 +27,21 @@ function detectWindowResize() {
 
 }
 
+class Captions extends React.Component {
+	render() {
+		const captionLength = 55;
+		return (
+			<div className="caption-align"><span className="instagram-captions">
+				{
+					this.props.showCaption ?
+					this.props.caption.length > captionLength ? this.props.caption.substring(0 , captionLength)+"..." : this.props.caption
+					: ""
+				}
+			</span></div>
+		);
+	}
+}
+
 export default class extends React.Component {
 
 	constructor() {
@@ -42,13 +58,13 @@ export default class extends React.Component {
 	initCalc() {
 		console.log("init calc");
 		const numSlides = Math.floor(
-			(document.documentElement.clientWidth - 100) / this.props.configuration.portletInstance.imageswidth
+			(document.querySelector(componentQuery).offsetWidth - 100) / this.props.configuration.portletInstance.imageswidth
 		) === 0 ? 1 :
 			Math.floor(
-				(document.documentElement.clientWidth - 100) / this.props.configuration.portletInstance.imageswidth
+				(document.querySelector(componentQuery).offsetWidth - 100) / this.props.configuration.portletInstance.imageswidth
 			) > this.props.configuration.portletInstance.slides ? this.props.configuration.portletInstance.slides :
 				Math.floor(
-					(document.documentElement.clientWidth - 100) / this.props.configuration.portletInstance.imageswidth
+					(document.querySelector(componentQuery).offsetWidth - 100) / this.props.configuration.portletInstance.imageswidth
 				)
 			;
 
@@ -56,6 +72,7 @@ export default class extends React.Component {
 
 			document.querySelector('.instagram-carousel').classList.add('instagram-carousel-responsive');
 			document.querySelectorAll('.instagram-captions').forEach(x => x.classList.add('instagram-captions-responsive'));
+
 		}
 
 		document.documentElement.style.setProperty("--carousel-width",
@@ -77,11 +94,11 @@ export default class extends React.Component {
 
 		if (detectWindowResize()) {
 			let carouselWidth = (parseInt(document.documentElement.style.getPropertyValue("--photo-width")) * numSlides) + 300;
-			console.log(document.documentElement.clientWidth, carouselWidth, typeof this.props.configuration.portletInstance.slides, this.props.configuration.portletInstance.slides);
+			console.log(document.querySelector(componentQuery).offsetWidth, carouselWidth, typeof this.props.configuration.portletInstance.slides, this.props.configuration.portletInstance.slides);
 
 			//document.getElementsByTagName("body")[0].style.backgroundColor = "green";
 
-			if ((document.documentElement.clientWidth > carouselWidth)
+			if ((document.querySelector(componentQuery).offsetWidth > carouselWidth)
 				&& this.props.configuration.portletInstance.slides != "1") {
 				console.log("ok1");
 
@@ -91,6 +108,11 @@ export default class extends React.Component {
 				document.querySelectorAll('[name=instagram-imagenes]').forEach(x => x.classList.remove('instagram-imagenes-responsive'));
 				document.querySelectorAll('.instagram-captions').forEach(x => x.classList.remove('instagram-captions-responsive'));
 
+				if (!!document.getElementById('instagram-album-carousel')) {
+					document.getElementById('instagram-album-carousel').classList.remove('instagram-album-carousel-responsive');
+					document.querySelectorAll('.instagram-album-imagenes').forEach(x => x.classList.remove('instagram-album-imagenes-responsive'));
+				}
+
 				document.documentElement.style.setProperty("--carousel-width",
 					parseInt(this.props.configuration.portletInstance.imageswidth) * (numSlides + 1) + 'px');
 
@@ -98,7 +120,7 @@ export default class extends React.Component {
 					slides: numSlides + 1
 				});
 
-			} else if ((document.documentElement.clientWidth > carouselWidth) && this.props.configuration.portletInstance.slides == "1") {
+			} else if ((document.querySelector(componentQuery).offsetWidth > carouselWidth) && this.props.configuration.portletInstance.slides == "1") {
 				document.documentElement.style.setProperty('--carousel-width',
 					document.documentElement.style.getPropertyValue("--photo-width"));
 				this.setState({
@@ -110,9 +132,9 @@ export default class extends React.Component {
 
 			//document.getElementsByTagName("body")[0].style.backgroundColor = "red";
 			let carouselWidth = (parseInt(document.documentElement.style.getPropertyValue("--photo-width")) * numSlides) + 100;
-			console.log(document.documentElement.clientWidth, carouselWidth, typeof this.props.configuration.portletInstance.slides, this.props.configuration.portletInstance.slides);
+			console.log(document.querySelector(componentQuery).offsetWidth, carouselWidth, typeof this.props.configuration.portletInstance.slides, this.props.configuration.portletInstance.slides);
 
-			if (document.documentElement.clientWidth < carouselWidth) {
+			if (document.querySelector(componentQuery).offsetWidth < carouselWidth) {
 				console.log("ok2");
 
 				if (this.props.configuration.portletInstance.slides != "1") {
@@ -126,6 +148,11 @@ export default class extends React.Component {
 						document.querySelector('.instagram-carousel').classList.add('instagram-carousel-responsive');
 						document.querySelectorAll('[name=instagram-imagenes]').forEach(x => x.classList.add('instagram-imagenes-responsive'));
 						document.querySelectorAll('.instagram-captions').forEach(x => x.classList.add('instagram-captions-responsive'));
+
+						if (!!document.getElementById('instagram-album-carousel')) {
+							document.getElementById('instagram-album-carousel').classList.add('instagram-album-carousel-responsive');
+							document.querySelectorAll('.instagram-album-imagenes').forEach(x => x.classList.add('instagram-album-imagenes-responsive'));
+						}
 					}
 
 					this.setState({
@@ -148,6 +175,8 @@ export default class extends React.Component {
 
 
 	componentDidMount() {
+
+		init = false;
 
 		console.log(this.props.configuration);
 		const getInstagramPosts = async () => {
@@ -203,6 +232,14 @@ export default class extends React.Component {
 	hideAlbum() {
 		document.getElementById("instagram-album-popup").classList.remove("instagram-album-carousel-show");
 		this.setState({ popup: false });
+	}
+
+	checkInitAlbum() {
+		if (this.state.slides == 1) {
+			return "";
+		}
+
+
 	}
 
 	hoveredItemEnter(e) {
@@ -271,7 +308,10 @@ export default class extends React.Component {
 												</div>
 												: ""}
 											<a className="instagram-enlaces" href={post.permalink} onMouseOver={this.hoveredItemEnter} onMouseLeave={this.hoveredItemLeave}>
-												<div className="caption-align"><span className="instagram-captions">{post.caption}</span></div>
+												<Captions
+													showCaption={this.props.configuration.portletInstance.showcaptions}
+													caption={post.caption}
+												></Captions>
 												<img name="instagram-imagenes" className={this.state.hovered ? "hovered" : ""} src={post.media_type === "VIDEO" ? post.thumbnail_url : post.media_url} />
 											</a>
 										</div>
@@ -286,19 +326,18 @@ export default class extends React.Component {
 					<link rel="stylesheet" charSet="UTF-8" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css" />
 				</AppendHead>
 				<div id="instagram-album-popup">
-					<div id="instagram-album-popup-close" onClick={() => this.hideAlbum()}><svg aria-hidden="true" focusable="false" data-icon="times" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 512"><path fill="currentColor" d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"></path></svg></div>
 					{
 						this.state.popup !== false ?
 
-							<div id="instagram-album-carousel">
-
+							<div id="instagram-album-carousel" className={this.state.slides == 1 ? "instagram-album-carousel-responsive" : ""}>
+								<div id="instagram-album-popup-close" onClick={() => this.hideAlbum()}><svg aria-hidden="true" focusable="false" data-icon="times" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 512"><path fill="currentColor" d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"></path></svg></div>
 								<Slider {...popup_settings}>
 									{
 										Array.from(this.state.popup.data).map((o, index) => {
 											console.log("p", o);
 											return (
 												<div key={index}>
-													<img name="instagram-imagenes" src={o.media_url} />
+													<img className={this.state.slides == 1 ? "instagram-album-imagenes instagram-album-imagenes-responsive" : "instagram-album-imagenes"} src={o.media_url} />
 												</div>
 											);
 										})

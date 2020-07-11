@@ -55,6 +55,12 @@
 				"name": "slides",
 				"description": "slides-help",
 				"default": "3"
+			},
+			"showcaptions": {
+				"type": "boolean",
+				"name": "showcaptions",
+				"description": "showcaptions-help",
+				"default": "true"
 			}
 		}
 	}

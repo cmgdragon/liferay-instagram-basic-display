@@ -76,7 +76,7 @@
   }
 
   .instagram-captions-responsive {
-   /* max-width: min-content;*/
+	max-width: 220px;
   }
 
   .caption-align{
@@ -108,14 +108,13 @@
   }
 
 #instagram-album-popup {
-	background-color: black;
+	background-color: rgba(0, 0, 0, 0);
     position: absolute;
     z-index: 999;
-    top: -100vh;
-    left: -100vw;
-    bottom: -100vh;
-	right: -100vw;
-	transition: all ease-in .5s;
+    left: 0;
+    bottom: 0;
+	right: 0;
+	top: 0;
 	display: none;
     align-items: center;
     justify-content: center;
@@ -128,6 +127,14 @@
 
 #instagram-album-carousel {
 	width: var(--photo-width);
+	height: var(--photo-height);
+	-webkit-box-shadow: 3px 4px 33px 16px rgba(0,0,0,0.75);
+	-moz-box-shadow: 3px 4px 33px 16px rgba(0,0,0,0.75);
+	box-shadow: 3px 4px 33px 16px rgba(0,0,0,0.75);
+}
+
+.instagram-album-carousel-responsive {
+	width: 50vw !important;
 }
 
 #instagram-album-popup-close {
@@ -135,12 +142,25 @@
     width: 1.4em;
     z-index: 20;
     color: white;
-    margin-top: .6em;
-    top: 100vh;
-    right: 110vw;
+    top: 10px;
+    right: 20px;
 }
 
 #instagram-album-popup-close:hover, .instagram-icono-album > svg:hover {
 	opacity: .7;
 	cursor: pointer;
 }
+
+.instagram-album-imagenes {
+	width: var(--photo-width);
+	object-fit: cover;
+	-o-object-fit: cover;
+	filter: brightness(.8);
+	margin: 0;
+	transition: all ease .3s;
+	height: var(--photo-height);
+  }
+
+  .instagram-album-imagenes-responsive {
+	  width: 50vw !important;
+  }
