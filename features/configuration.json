@@ -56,6 +56,12 @@
 				"description": "slides-help",
 				"default": "3"
 			},
+			"rows": {
+				"type": "string",
+				"name": "rows",
+				"description": "rows-help",
+				"default": "1"
+			},
 			"showcaptions": {
 				"type": "string",
 				"name": "showcaptions",

@@ -14,7 +14,7 @@ import AppComponent from './AppComponent';
  * @return {void}
  */
 export default function main({portletNamespace, contextPath, portletElementId, configuration}) {
-    
+
     ReactDOM.render(
         <AppComponent 
             portletNamespace={portletNamespace} 

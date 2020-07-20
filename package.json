@@ -17,10 +17,7 @@
 	"dependencies": {
 		"babel-polyfill": "^6.26.0",
 		"react": "16.8.6",
-		"react-append-head": "^1.0.11",
-		"react-dom": "16.8.6",
-		"react-slick": "^0.26.1",
-		"slick-carousel": "^1.8.1"
+		"react-dom": "16.8.6"
 	},
 	"scripts": {
 		"build": "babel --source-maps -d build src && npm run copy-assets && liferay-npm-bundler",
