@@ -9,6 +9,7 @@ const FIELDS_CHILDREN = "permalink,media_url,thumbnail_url";
 const componentQuery = "[id^=portlet_liferayinstagrambasicdisplay]";
 
 let lastW = window.outerHeight;
+
 let cached_response = {
 	feed: {},
 	album: {}
@@ -229,6 +230,7 @@ export default class extends React.Component {
 
 	async albumButton(media_id) {
 
+		
 		document.getElementById("instagram-album-popup").classList.add("instagram-album-carousel-show");
 		document.querySelector("#instagram-album-popup .spinner").classList.add("spiner-show");
 
@@ -248,18 +250,14 @@ export default class extends React.Component {
 
 	componentDidUpdate() {
 
-		if (!!document.querySelector('#instagram-album-slick'))
+		console.log(cached_response.album);
+		if (!!document.getElementById('instagram-album-slick') && !document.getElementById('instagram-album-slick').classList.contains('slick-initialized'))
 			$('#instagram-album-slick').slick();
-			
+		else if (!!document.getElementById('instagram-album-slick') && !document.querySelector('#instagram-album-popup').classList.contains('instagram-album-carousel-show') && document.getElementById('instagram-album-slick').classList.contains('slick-initialized'))
+			document.getElementById('instagram-album-carousel').remove();
+
 		$('#instagram-content [data-slick]').not('.slick-initialized').slick();
 
-	}
-
-	shouldComponentUpdate() {
-		if (!!document.querySelector('#instagram-album-popup') && !!document.querySelector('#instagram-album-slick.slick-initialized'))
-			return false;
-		else
-			return true;
 	}
 
 	hideAlbum() {
@@ -343,7 +341,7 @@ export default class extends React.Component {
 						<div className="bounce3"></div>
 					</div>
 					{
-						this.state.popup_open !== false ?
+						this.state.popup_open ?
 
 							<div id="instagram-album-carousel" className={this.state.slides == 1 ? "instagram-album-carousel-responsive" : ""}>
 								<div id="instagram-album-popup-close" onClick={() => this.hideAlbum()}><svg id="icon-instagram-album-close" aria-hidden="true" focusable="false" data-icon="times" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 512"><path fill="currentColor" d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"></path></svg></div>
