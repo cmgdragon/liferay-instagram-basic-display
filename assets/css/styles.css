@@ -1,36 +1,22 @@
-:root{
-	--carousel-height: 240;
-	--carousel-width: 720px;
-	--photo-width: 240px;
-	--photo-height: 240px;
-	--fuente: 16px;
-	--caption-width: 240px;
-	--margin-captions: 180px;
-	--slick-slide-height: unset;
-  }
 
 [id^=portlet_liferayinstagrambasicdisplay] .portlet-content .portlet-content-container {
 	margin-bottom: 2.2rem;
-}
+}/*******/
 
-#foto-slides, .slick-slide {
-	max-width: var(--photo-width);
-	width: var(--photo-width);
-}
 
 .slick-track {
     /*display: flex !important;*/
     /*justify-content: center;*/
     height: 100%;
-}
+}/******/
 
 .slick-dots {
 	bottom: unset !important;
-}
+}/*****/
 
 .slick-dots li {
 	margin: 0 3px !important;
-}
+}/*****/
 
 #instagram-content {
 	display: flex !important;
@@ -45,71 +31,36 @@
     z-index: 5;
 }
 
-.instagram-carousel {
-	height: var(--carousel-height);
-	width: var(--carousel-width);
-
-  }
-  
-.slick-slide > div {
-	height: var(--slick-slide-height);
-}
-
-.instagram-carousel-responsive {
-    height: auto;
-    max-width: var(--carousel-width);
-    width: 100%;
-}
-
-  .instagram-enlaces {
-	max-width: var(--photo-width);
-	
-  }
-
-  [name=instagram-imagenes] {
-	width: var(--photo-width);
-	object-fit: cover;
-	-o-object-fit: cover;
-	filter: brightness(.8);
-	margin: 0;
-	transition: all ease .3s;
-	height: var(--photo-height);
-  }
 
 .instagram-imagenes-responsive {
 	width: 100%;
 }
 
-.instagram-captions {
-	color: white;
-	text-shadow: -2px 0px 11px rgba(0, 0, 0, 1);
-	font-weight: bold;
-	position: absolute;
-	z-index: 10;
-	margin-top: var(--margin-captions);
-	max-width: var(--caption-width);
-	font-size: var(--fuente);
-}
-
   .instagram-captions-responsive {
-	max-width: 220px;
+	max-width: unset;
   }
 
   .caption-align{
 	display: flex;
 	justify-content: flex-start;
 	padding-left: .4em;
-  }
+  }/******/
 
   .instagram-icono-album {
 	  display: flex;
 	  justify-content: flex-end;
 	  margin-right: .6em;
-  }
+  }/****/
 
-  .hovered {
+  .instagram-hovered {
 	filter:  brightness(.4);
-  }
+}/*****/
+
+
+.instagram-icono-album > svg:hover {
+	opacity: .7;
+	cursor: pointer;
+}/******/
 
 .instagram-icono-album > svg {
     position: absolute;
@@ -117,7 +68,7 @@
     z-index: 20;
 	color: white;
     margin-top: .6em;
-  }
+  } /****/
 
 #instagram-album-popup {
 	background-color: rgba(0, 0, 0, 0);
@@ -135,24 +86,8 @@
 .instagram-album-carousel-show {
 	display: flex !important;
 	background-color: rgba(0, 0, 0, .6) !important;
-}
+}/*****/
 
-#instagram-album-carousel {
-	width: var(--carousel-height);
-	height: var(--carousel-height);
-	-webkit-box-shadow: 3px 4px 33px 16px rgba(0,0,0,0.75);
-	-moz-box-shadow: 3px 4px 33px 16px rgba(0,0,0,0.75);
-	box-shadow: 3px 4px 33px 16px rgba(0,0,0,0.75);
-}
-
-.instagram-album-carousel-responsive {
-  width: 70vw !important;
-  max-width: var(--photo-width);
-}
-
-#instagram-album-slick .slick-slide {
-	max-width: var(--carousel-height);
-}
 
 #instagram-album-popup-close {
 	position: absolute;
@@ -175,20 +110,6 @@
 	cursor: pointer;
 }
 
-.instagram-album-imagenes {
-	width: var(--carousel-height);
-	object-fit: cover;
-	-o-object-fit: cover;
-	filter: brightness(.8);
-	margin: 0;
-	transition: all ease .3s;
-	height: var(--carousel-height);
-  }
-
-  .instagram-album-imagenes-responsive {
-    width: 70vw !important;
-    max-width: var(--photo-width);
-  }
 
   /* Loader from  https://tobiasahlin.com/spinkit/ */
   .spinner {
@@ -222,12 +143,12 @@
 	animation-delay: -0.16s;
   }
   
-  @-webkit-keyframes sk-bouncedelay {
+  @-webkit-keyframes sk-bouncedelay {/******/
 	0%, 80%, 100% { -webkit-transform: scale(0) }
 	40% { -webkit-transform: scale(1.0) }
   }
   
-  @keyframes sk-bouncedelay {
+  @keyframes sk-bouncedelay {/*****/
 	0%, 80%, 100% { 
 	  -webkit-transform: scale(0);
 	  transform: scale(0);
@@ -236,4 +157,5 @@
 	  transform: scale(1.0);
 	}
   }
+
   /* End loader */

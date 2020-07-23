@@ -15,16 +15,25 @@ import AppComponent from './AppComponent';
  */
 export default function main({portletNamespace, contextPath, portletElementId, configuration}) {
 
-    ReactDOM.render(
-        <AppComponent 
-            portletNamespace={portletNamespace} 
-            contextPath={contextPath}
-            portletElementId={portletElementId}
-            
-            configuration={configuration}
-            
-            />, 
-        document.getElementById(portletElementId)
-    );
-    
+    if (JSON.stringify(configuration.portletInstance) === '{}') {
+
+        ReactDOM.render(<span>Please, configure and save the portlet to make it work</span>,
+            document.getElementById(portletElementId));
+
+    } else {
+
+        ReactDOM.render(
+            <AppComponent 
+                portletNamespace={portletNamespace} 
+                contextPath={contextPath}
+                portletElementId={portletElementId}
+                
+                configuration={configuration}
+                
+                />, 
+            document.getElementById(portletElementId)
+        );
+
+    }
+
 }

@@ -1,12 +1,12 @@
 import React from 'react';
 import 'babel-polyfill';
+import CssInclude from './CssInclude';
 
 const API_HOST = "https://graph.instagram.com/";
 const ENDPOINT_MEDIA = "/media";
 const ENDPOINT_CHILDREN = "/children";
 const FIELDS_MEDIA = "id,caption,permalink,media_type,media_url,thumbnail_url";
 const FIELDS_CHILDREN = "permalink,media_url,thumbnail_url";
-const componentQuery = "[id^=portlet_liferayinstagrambasicdisplay]";
 
 let lastW = window.outerHeight;
 
@@ -14,21 +14,6 @@ let cached_response = {
 	feed: {},
 	album: {}
 }
-
-function detectWindowResize() {
-
-	let x = window.innerWidth;
-
-	if (lastW <= x) {
-		lastW = x;
-		return true;
-	} else {
-		lastW = x;
-		return false;
-	}
-
-}
-
 
 class Captions extends React.Component {
 	render() {
@@ -53,125 +38,117 @@ export default class extends React.Component {
 		super(props);
 		this.state = {
 			fotos: cached_response.feed[this.props.configuration.portletInstance.token || this.props.configuration.portletInstance.token] !== undefined ? cached_response.feed[this.props.configuration.system.token || this.props.configuration.system.token] : undefined,
-			slides: "3",
+			slides: "2",
 			popup_open: false,
 			album: {},
+			elementWidth: document.getElementById(this.props.portletElementId).offsetWidth,
+			canresize: true
 		}
 
+		this.init = true;
+		this.resizeObserver = undefined;
+		this.resizeTimeOut = undefined;
+
+	}
+
+	getInstanceId() {
+		return this.props.portletElementId.substring(
+			this.props.portletElementId.indexOf('INSTANCE_') + 'INSTANCE_'.length,
+			this.props.portletElementId.length - 1
+		);
 	}
 
 	getNumSlides() {
 
-		const numSlides = Math.floor(
+		const numSlides = !(!!document.getElementById(this.props.portletElementId)) ? undefined :
 
-			(document.querySelector(componentQuery).offsetWidth - 100) / this.props.configuration.portletInstance.imageswidth
+		Math.floor(
+			(document.getElementById(this.props.portletElementId).offsetWidth - 100) / this.props.configuration.portletInstance.imageswidth
 		) === 0 ? 1 :
 			Math.floor(
-				(document.querySelector(componentQuery).offsetWidth - 100) / this.props.configuration.portletInstance.imageswidth
+				(document.getElementById(this.props.portletElementId).offsetWidth - 100) / this.props.configuration.portletInstance.imageswidth
 			) > this.props.configuration.portletInstance.slides ?
 			 this.props.configuration.portletInstance.slides :
 				Math.floor(
-					(document.querySelector(componentQuery).offsetWidth - 100) / this.props.configuration.portletInstance.imageswidth
+					(document.getElementById(this.props.portletElementId).offsetWidth - 100) / this.props.configuration.portletInstance.imageswidth
 				);
 
 		return numSlides;
 	}
 
-	calculateSize() {
-			
-		const numSlides = this.getNumSlides();
+	resizeCarousel(numSlides) {
 
-		if (numSlides === 1) {
+		console.log(this.state.canresize);
 
-			if (!!document.querySelector('.instagram-carousel')) {
-				document.querySelector('.instagram-carousel').classList.add('instagram-carousel-responsive');
-				document.querySelectorAll('.instagram-captions').forEach(x => x.classList.add('instagram-captions-responsive'));
-			}
-		}
-
-		document.documentElement.style.setProperty("--carousel-width",
+		document.documentElement.style.setProperty(`--${this.getInstanceId()}-carousel-width`,
 			(this.props.configuration.portletInstance.imageswidth * numSlides) + 'px');
 
-		this.setState({
-			slides: numSlides
-		});
-	
-		$('#instagram-content [data-slick]').not('.slick-initialized').slick();
+			if (numSlides === 1) {
+
+				if (!!document.querySelector(`#${this.props.portletElementId} .instagram-carousel`)) {
+					document.querySelector(`#${this.props.portletElementId} .instagram-carousel`).classList.add('instagram-carousel-responsive');
+					document.querySelectorAll(`#${this.props.portletElementId} .instagram-captions`).forEach(x => x.classList.add('instagram-captions-responsive'));
+				}
+
+			} else {
+
+				if (!!document.querySelector(`#${this.props.portletElementId} .instagram-carousel`)) {
+					document.querySelector(`#${this.props.portletElementId} .instagram-carousel`).classList.remove('instagram-carousel-responsive');
+					document.querySelectorAll(`#${this.props.portletElementId} .instagram-captions`).forEach(x => x.classList.remove('instagram-captions-responsive'));
+				}
+
+			}
+
+		$(`#${this.props.portletElementId} #instagram-content [data-slick]`).slick("slickSetOption", "slidesToShow", numSlides);
+		$(`#${this.props.portletElementId} #instagram-content [data-slick]`).slick("refresh");
 		
 	}
 
-	refreshSlides() {
-		$('#instagram-content [data-slick]').slick("slickSetOption", "slidesToShow", this.getNumSlides());
-		$('#instagram-content [data-slick]').slick("refresh");
+	calculateFirstTime() {
+			
+		const numSlides = this.getNumSlides();
+	
+		$(`#${this.props.portletElementId} #instagram-content [data-slick]`).not('.slick-initialized').slick();
+
+		this.resizeObserver = new ResizeObserver((entries) => {
+			for (entry of entries) {
+				this.calculateSlides();
+			}
+	   });
+		
+	   this.resizeObserver.observe(document.getElementById(this.props.portletElementId));
 	}
 
 	calculateSlides() {
 
-		const numSlides = parseInt(this.state.slides);
+		if (!this.state.canresize || !(!!document.getElementById(this.props.portletElementId))) return;
 
-		if (detectWindowResize()) {
-			let carouselWidth = (parseInt(document.documentElement.style.getPropertyValue("--photo-width")) * numSlides) + 300;
 
-			if ((document.querySelector(componentQuery).offsetWidth > carouselWidth)
-				&& this.props.configuration.portletInstance.slides != "1") {
 
-				if (this.state.slides >= this.props.configuration.portletInstance.slides) return;
+		const numSlides = this.getNumSlides();
+		console.log("k");
 
-				document.querySelector('.instagram-carousel').classList.remove('instagram-imagenes-responsive');
-				document.querySelectorAll('[name=instagram-imagenes]').forEach(x => x.classList.remove('instagram-imagenes-responsive'));
-				document.querySelectorAll('.instagram-captions').forEach(x => x.classList.remove('instagram-captions-responsive'));
+		let carouselWidth = (parseInt(document.documentElement.style.getPropertyValue(`--${this.getInstanceId()}-photo-width`)) * numSlides) + 300;
 
-				if (!!document.getElementById('instagram-album-carousel')) {
-					document.getElementById('instagram-album-carousel').classList.remove('instagram-album-carousel-responsive');
-					document.querySelectorAll('.instagram-album-imagenes').forEach(x => x.classList.remove('instagram-album-imagenes-responsive'));
-				}
+		if ((document.getElementById(this.props.portletElementId).offsetWidth > carouselWidth)
+			&& this.props.configuration.portletInstance.slides != "1") {
 
-				this.calculateSize();
-				this.refreshSlides();
+			if (numSlides > this.props.configuration.portletInstance.slides) return;
 
-			} else if ((document.querySelector(componentQuery).offsetWidth > carouselWidth) && this.props.configuration.portletInstance.slides == "1") {
+			this.resizeCarousel(numSlides);
+			return;
 
-				document.documentElement.style.setProperty('--carousel-width',
-					document.documentElement.style.getPropertyValue("--photo-width"));
+		} else if ((document.getElementById(this.props.portletElementId).offsetWidth > carouselWidth) && this.props.configuration.portletInstance.slides == "1") {
 
-				this.setState({slides: "1"});
-				this.refreshSlides();
-			}
+			document.documentElement.style.setProperty(`--${this.getInstanceId()}-carousel-width`,
+				document.documentElement.style.getPropertyValue(`--${this.getInstanceId()}-photo-width`));
 
-		} else {
-
-			let carouselWidth = (parseInt(document.documentElement.style.getPropertyValue("--photo-width")) * numSlides) + 100;
-
-			if (document.querySelector(componentQuery).offsetWidth < carouselWidth) {
-
-				if (this.props.configuration.portletInstance.slides != "1") {
-
-					if (this.state.slides <= 1) return;
-
-					if (numSlides === 2) {
-						document.querySelector('.instagram-carousel').classList.add('instagram-carousel-responsive');
-						document.querySelectorAll('[name=instagram-imagenes]').forEach(x => x.classList.add('instagram-imagenes-responsive'));
-						document.querySelectorAll('.instagram-captions').forEach(x => x.classList.add('instagram-captions-responsive'));
-
-						if (!!document.getElementById('instagram-album-carousel')) {
-							document.getElementById('instagram-album-carousel').classList.add('instagram-album-carousel-responsive');
-							document.querySelectorAll('.instagram-album-imagenes').forEach(x => x.classList.add('instagram-album-imagenes-responsive'));
-						}
-					}
-
-					this.calculateSize();
-					this.refreshSlides();
-
-				} else if (this.state.slides == "1") {
-
-					this.setState({slides: 1});
-					this.refreshSlides();
-
-				}
-
-			}
-
+			this.resizeCarousel(numSlides);
+			return;
 		}
+
+		this.resizeCarousel(numSlides);
+		this.setState({canresize: false});
 
 	}
 
@@ -194,45 +171,66 @@ export default class extends React.Component {
 			}else 
 				this.setState({fotos: cached_response.feed[this.props.configuration.portletInstance.token || this.props.configuration.system.token]});
 
-			document.documentElement.style.setProperty('--photo-width', this.props.configuration.portletInstance.imageswidth +
+			document.documentElement.style.setProperty(`--${this.getInstanceId()}-photo-width`, this.props.configuration.portletInstance.imageswidth +
 				'px');
-			document.documentElement.style.setProperty('--photo-height', this.props.configuration.portletInstance.imagesheight +
+			document.documentElement.style.setProperty(`--${this.getInstanceId()}-photo-height`, this.props.configuration.portletInstance.imagesheight +
 				'px');
-			document.documentElement.style.setProperty('--fuente', this.props.configuration.portletInstance.fontsize +
+			document.documentElement.style.setProperty(`--${this.getInstanceId()}-fuente`, this.props.configuration.portletInstance.fontsize +
 				'px');
-			document.documentElement.style.setProperty('--caption-width', parseInt(this.props.configuration.portletInstance.imageswidth) - 20 +
+			document.documentElement.style.setProperty(`--${this.getInstanceId()}-caption-width`, parseInt(this.props.configuration.portletInstance.imageswidth) - 20 +
 				'px');
-			document.documentElement.style.setProperty('--margin-captions', parseInt(this.props.configuration.portletInstance.imagesheight) - 60 - parseInt(this.props.configuration.portletInstance.fontsize) +
+			document.documentElement.style.setProperty(`--${this.getInstanceId()}-margin-captions`, parseInt(this.props.configuration.portletInstance.imagesheight) - 60 - parseInt(this.props.configuration.portletInstance.fontsize) +
 				'px');
 
-			document.documentElement.style.setProperty('--carousel-width', parseInt(this.props.configuration.portletInstance.imageswidth) * parseInt(this.props.configuration.portletInstance.slides) + 'px');
+			document.documentElement.style.setProperty(`--${this.getInstanceId()}-carousel-width`, parseInt(this.props.configuration.portletInstance.imageswidth) * parseInt(this.props.configuration.portletInstance.slides) + 'px');
 			
 			this.props.configuration.portletInstance.rows > 1 ?
-				document.documentElement.style.setProperty('--carousel-height', (this.props.configuration.portletInstance.imagesheight * 2) +
+				document.documentElement.style.setProperty(`--${this.getInstanceId()}-carousel-height`, (this.props.configuration.portletInstance.imagesheight * 2) +
 				'px') :
-				document.documentElement.style.setProperty('--carousel-height', this.props.configuration.portletInstance.imagesheight +
+				document.documentElement.style.setProperty(`--${this.getInstanceId()}-carousel-height`, this.props.configuration.portletInstance.imagesheight +
 				'px');
 
 			this.props.configuration.portletInstance.rows > 1 ?
-				document.documentElement.style.setProperty('--slick-slide-height', this.props.configuration.portletInstance.imagesheight +
+				document.documentElement.style.setProperty(`--${this.getInstanceId()}-slick-slide-height`, this.props.configuration.portletInstance.imagesheight +
 				'px') :
-				document.documentElement.style.setProperty('--slick-slide-height', 'unset');		
+				document.documentElement.style.setProperty(`--${this.getInstanceId()}-slick-slide-height`, 'unset');		
 
-			this.calculateSize();
-			
-			
 		};
 
 		getInstagramPosts();
-		window.addEventListener("resize", () => this.calculateSlides());
-		
+		if (this.init) this.calculateFirstTime(); else this.calculateSlides();
+		this.init = false;
+
+	}
+
+	/*shouldComponentUpdate(nextProps, nextState) {
+		return this.state.canresize;
+	}*/
+
+	componentWillUnmount() {
+		this.resizeObserver.unobserve(document.getElementById(this.props.portletElementId));
+	}
+
+	detectNodeResize(newWidth) {
+		if (this.state.elementWidth <= newWidth) {
+			this.setState({
+				elementWidth: newWidth
+			});
+			return true;
+		} else {;
+			this.setState({
+				elementWidth: newWidth
+			});
+			return false;
+		}
+	
 	}
 
 	async albumButton(media_id) {
 
 		
-		document.getElementById("instagram-album-popup").classList.add("instagram-album-carousel-show");
-		document.querySelector("#instagram-album-popup .spinner").classList.add("spiner-show");
+		document.querySelector(`#${this.props.portletElementId} #instagram-album-popup`).classList.add("instagram-album-carousel-show");
+		document.querySelector(`#${this.props.portletElementId} #instagram-album-popup .spinner`).classList.add("spiner-show");
 
 		if (cached_response.album[media_id] === undefined) {
 
@@ -244,24 +242,33 @@ export default class extends React.Component {
 		} else
 			this.setState({ popup_open: true, album: cached_response.album[media_id] });
 
-		document.querySelector("#instagram-album-popup .spinner").classList.remove("spiner-show");
+		document.querySelector(`#${this.props.portletElementId} #instagram-album-popup .spinner`).classList.remove("spiner-show");
 
 	}
 
 	componentDidUpdate() {
 
-		console.log(cached_response.album);
-		if (!!document.getElementById('instagram-album-slick') && !document.getElementById('instagram-album-slick').classList.contains('slick-initialized'))
-			$('#instagram-album-slick').slick();
-		else if (!!document.getElementById('instagram-album-slick') && !document.querySelector('#instagram-album-popup').classList.contains('instagram-album-carousel-show') && document.getElementById('instagram-album-slick').classList.contains('slick-initialized'))
-			document.getElementById('instagram-album-carousel').remove();
+		if (!!document.querySelector(`#${this.props.portletElementId} #instagram-album-slick`) && !document.querySelector(`#${this.props.portletElementId} #instagram-album-slick`).classList.contains('slick-initialized'))
+			$(`#${this.props.portletElementId} #instagram-album-slick`).slick();
+		else if (!!document.querySelector(`#${this.props.portletElementId} #instagram-album-slick`) && !document.querySelector(`#${this.props.portletElementId} #instagram-album-popup`).classList.contains('instagram-album-carousel-show') && document.getElementById('instagram-album-slick').classList.contains('slick-initialized'))
+			document.querySelector(`#${this.props.portletElementId} #instagram-album-carousel`).remove();
 
-		$('#instagram-content [data-slick]').not('.slick-initialized').slick();
+		$(`#${this.props.portletElementId} #instagram-content [data-slick]`).not('.slick-initialized').slick();
+
+		if (!this.state.canresize){
+			clearTimeout(this.resizeTimeOut);
+			this.resizeTimeOut = setTimeout(() => {
+				this.setState({canresize: true});
+				this.resizeCarousel(this.getNumSlides());
+				console.log('can resize');
+			}, 2000);
+			
+		}
 
 	}
 
 	hideAlbum() {
-		document.getElementById("instagram-album-popup").classList.remove("instagram-album-carousel-show");
+		document.querySelector(`#${this.props.portletElementId} #instagram-album-popup`).classList.remove("instagram-album-carousel-show");
 		this.setState({ popup_open: false });
 	}
 
@@ -300,11 +307,12 @@ export default class extends React.Component {
 			autoplaySpeed: 5000,
 			speed: 500,
 			slidesToShow: 1,
-			slidesToScroll: 1,
+			slidesToScroll: 1
 		};
 
 		return (
-			<div>
+			<div id={this.getInstanceId()}>	
+				<CssInclude instance={this.getInstanceId()} />
 				{ this.state.fotos !== undefined ?
 				<div id="instagram-content">
 					<div className="instagram-carousel">
@@ -323,7 +331,7 @@ export default class extends React.Component {
 													showCaption={this.props.configuration.portletInstance.showcaptions}
 													caption={post.caption}
 												></Captions>
-												<img name="instagram-imagenes" className={this.state.hovered ? "hovered" : ""} src={post.media_type === "VIDEO" ? post.thumbnail_url : post.media_url} />
+												<img name="instagram-imagenes" className={this.state.hovered ? "instagram-hovered" : ""} src={post.media_type === "VIDEO" ? post.thumbnail_url : post.media_url} />
 											</a>
 										</div>
 									);
@@ -332,8 +340,7 @@ export default class extends React.Component {
 						</div>
 					</div>
 				</div>
-				: <span>Please, configure and save the portlet to make it work</span>
-				}
+					: ""}
 				<div id="instagram-album-popup">
 					<div className="spinner">
 						<div className="bounce1"></div>
@@ -343,14 +350,14 @@ export default class extends React.Component {
 					{
 						this.state.popup_open ?
 
-							<div id="instagram-album-carousel" className={this.state.slides == 1 ? "instagram-album-carousel-responsive" : ""}>
+							<div id="instagram-album-carousel" className={this.getNumSlides() == 1 ? "instagram-album-carousel-responsive" : ""}>
 								<div id="instagram-album-popup-close" onClick={() => this.hideAlbum()}><svg id="icon-instagram-album-close" aria-hidden="true" focusable="false" data-icon="times" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 512"><path fill="currentColor" d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"></path></svg></div>
 								<div id="instagram-album-slick" data-slick={JSON.stringify(popup_settings)}>
 									{
 										this.state.album.data.map((o, index) => {
 											return (
 												<div key={index}>
-													<img className={this.state.slides == 1 ? "instagram-album-imagenes instagram-album-imagenes-responsive" : "instagram-album-imagenes"} src={o.media_url} />
+													<img className={this.getNumSlides() == 1 ? "instagram-album-imagenes instagram-album-imagenes-responsive" : "instagram-album-imagenes"} src={o.media_url} />
 												</div>
 											);
 										})
