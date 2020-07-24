@@ -71,6 +71,12 @@
 					"show": "Show",
 					"hide": "Hide"
 				}
+			},
+			"debounce": {
+				"type": "string",
+				"name": "debounce",
+				"description": "debounce-help",
+				"default": "0"
 			}
 		}
 	}

@@ -16,7 +16,6 @@ A Liferay React widget that shows the last media uploaded to an Instagram accoun
 	1. Add you token and user id mentioned before.
 > you may want to generate a [long-lived token](https://developers.facebook.com/docs/instagram-basic-display-api/guides/long-lived-access-tokens "long-lived token") that you can use for 60 days and refresh it anytime
 1. Save it.
-1. Refresh the page.
 1. You are done!
 
 
@@ -34,3 +33,7 @@ You can add the id and token in the system settings and those will be used by de
 - **Captions** - Show/Hide feed captions
 - **Rows**
 - **Font Size** - Size of the captions
+- **Debounce responsive** - Lapsus in seconds in which the component can resize its with again
+
+#### Component responsiveness
+The carousel should automatically adapt to the width of the layout where it is placed, and also resize when the screen changes its width.

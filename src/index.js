@@ -2,7 +2,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import AppComponent from './AppComponent';
+import LRIGBasicDisplay from './LRIGBasicDisplay';
 
 /**
  * This is the main entry point of the portlet.
@@ -23,7 +23,7 @@ export default function main({portletNamespace, contextPath, portletElementId, c
     } else {
 
         ReactDOM.render(
-            <AppComponent 
+            <LRIGBasicDisplay 
                 portletNamespace={portletNamespace} 
                 contextPath={contextPath}
                 portletElementId={portletElementId}

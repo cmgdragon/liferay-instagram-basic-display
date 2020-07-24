@@ -8,8 +8,6 @@ const ENDPOINT_CHILDREN = "/children";
 const FIELDS_MEDIA = "id,caption,permalink,media_type,media_url,thumbnail_url";
 const FIELDS_CHILDREN = "permalink,media_url,thumbnail_url";
 
-let lastW = window.outerHeight;
-
 let cached_response = {
 	feed: {},
 	album: {}
@@ -41,13 +39,13 @@ export default class extends React.Component {
 			slides: "2",
 			popup_open: false,
 			album: {},
-			elementWidth: document.getElementById(this.props.portletElementId).offsetWidth,
-			canresize: true
+			elementWidth: document.getElementById(this.props.portletElementId).offsetWidth
 		}
 
 		this.init = true;
 		this.resizeObserver = undefined;
 		this.resizeTimeOut = undefined;
+		this.canresize = true;
 
 	}
 
@@ -63,22 +61,20 @@ export default class extends React.Component {
 		const numSlides = !(!!document.getElementById(this.props.portletElementId)) ? undefined :
 
 		Math.floor(
-			(document.getElementById(this.props.portletElementId).offsetWidth - 100) / this.props.configuration.portletInstance.imageswidth
+			(document.getElementById(this.props.portletElementId).offsetWidth - 50) / this.props.configuration.portletInstance.imageswidth
 		) === 0 ? 1 :
 			Math.floor(
-				(document.getElementById(this.props.portletElementId).offsetWidth - 100) / this.props.configuration.portletInstance.imageswidth
+				(document.getElementById(this.props.portletElementId).offsetWidth - 50) / this.props.configuration.portletInstance.imageswidth
 			) > this.props.configuration.portletInstance.slides ?
 			 this.props.configuration.portletInstance.slides :
 				Math.floor(
-					(document.getElementById(this.props.portletElementId).offsetWidth - 100) / this.props.configuration.portletInstance.imageswidth
+					(document.getElementById(this.props.portletElementId).offsetWidth - 50) / this.props.configuration.portletInstance.imageswidth
 				);
 
 		return numSlides;
 	}
 
 	resizeCarousel(numSlides) {
-
-		console.log(this.state.canresize);
 
 		document.documentElement.style.setProperty(`--${this.getInstanceId()}-carousel-width`,
 			(this.props.configuration.portletInstance.imageswidth * numSlides) + 'px');
@@ -101,7 +97,22 @@ export default class extends React.Component {
 
 		$(`#${this.props.portletElementId} #instagram-content [data-slick]`).slick("slickSetOption", "slidesToShow", numSlides);
 		$(`#${this.props.portletElementId} #instagram-content [data-slick]`).slick("refresh");
-		
+
+
+	}
+
+	activateResizeTimeOut(numSlides) {
+
+		if (this.init || this.props.configuration.portletInstance.debounce == "0") return;
+
+		this.canresize = false;
+
+		clearTimeout(this.resizeTimeOut);
+		this.resizeTimeOut = setTimeout(() => {
+			this.canresize = true;
+			this.resizeCarousel(numSlides);
+		}, parseInt(this.props.configuration.portletInstance.debounce)*1000);
+
 	}
 
 	calculateFirstTime() {
@@ -109,49 +120,68 @@ export default class extends React.Component {
 		const numSlides = this.getNumSlides();
 	
 		$(`#${this.props.portletElementId} #instagram-content [data-slick]`).not('.slick-initialized').slick();
-
 		this.resizeObserver = new ResizeObserver((entries) => {
 			for (entry of entries) {
-				this.calculateSlides();
+				this.calculateSlides(this.getNumSlides());
 			}
 	   });
 		
 	   this.resizeObserver.observe(document.getElementById(this.props.portletElementId));
 	}
 
-	calculateSlides() {
+	calculateSlides(curNumSlides) {
 
-		if (!this.state.canresize || !(!!document.getElementById(this.props.portletElementId))) return;
+		if (!(!!document.getElementById(this.props.portletElementId))) return;
 
-
-
+		const newSize = document.getElementById(this.props.portletElementId).offsetWidth;
 		const numSlides = this.getNumSlides();
-		console.log("k");
+		const carouselWidth = (parseInt(document.documentElement.style.getPropertyValue(`--${this.getInstanceId()}-photo-width`)) * numSlides);
+		
 
-		let carouselWidth = (parseInt(document.documentElement.style.getPropertyValue(`--${this.getInstanceId()}-photo-width`)) * numSlides) + 300;
+		if (this.detectNodeResize(newSize)) {
 
-		if ((document.getElementById(this.props.portletElementId).offsetWidth > carouselWidth)
-			&& this.props.configuration.portletInstance.slides != "1") {
+			if ((newSize > carouselWidth)
+				&& this.props.configuration.portletInstance.slides != "1") {
 
-			if (numSlides > this.props.configuration.portletInstance.slides) return;
+				if (!this.canresize || numSlides > this.props.configuration.portletInstance.slides) return;
 
-			this.resizeCarousel(numSlides);
-			return;
+				this.resizeCarousel(numSlides);
+				this.activateResizeTimeOut(curNumSlides, numSlides);
 
-		} else if ((document.getElementById(this.props.portletElementId).offsetWidth > carouselWidth) && this.props.configuration.portletInstance.slides == "1") {
+				return;
 
-			document.documentElement.style.setProperty(`--${this.getInstanceId()}-carousel-width`,
-				document.documentElement.style.getPropertyValue(`--${this.getInstanceId()}-photo-width`));
+			} else if ((newSize > carouselWidth) && this.props.configuration.portletInstance.slides == "1") {
 
-			this.resizeCarousel(numSlides);
-			return;
+				document.documentElement.style.setProperty(`--${this.getInstanceId()}-carousel-width`,
+					document.documentElement.style.getPropertyValue(`--${this.getInstanceId()}-photo-width`));
+
+				return;
+
+			}
+
+		} else {
+
+			if (carouselWidth < newSize) {
+
+				if (this.props.configuration.portletInstance.slides != "1") {
+
+					if (!this.canresize) return;
+					this.resizeCarousel(numSlides);
+					this.activateResizeTimeOut(curNumSlides, numSlides);
+
+					return;
+
+				} else if (numSlides == 1) {
+
+					return;
+
+				}
+
+			}
+
 		}
 
-		this.resizeCarousel(numSlides);
-		this.setState({canresize: false});
-
 	}
-
 
 	componentDidMount() {
 		
@@ -203,10 +233,6 @@ export default class extends React.Component {
 
 	}
 
-	/*shouldComponentUpdate(nextProps, nextState) {
-		return this.state.canresize;
-	}*/
-
 	componentWillUnmount() {
 		this.resizeObserver.unobserve(document.getElementById(this.props.portletElementId));
 	}
@@ -255,16 +281,6 @@ export default class extends React.Component {
 
 		$(`#${this.props.portletElementId} #instagram-content [data-slick]`).not('.slick-initialized').slick();
 
-		if (!this.state.canresize){
-			clearTimeout(this.resizeTimeOut);
-			this.resizeTimeOut = setTimeout(() => {
-				this.setState({canresize: true});
-				this.resizeCarousel(this.getNumSlides());
-				console.log('can resize');
-			}, 2000);
-			
-		}
-
 	}
 
 	hideAlbum() {
@@ -297,7 +313,7 @@ export default class extends React.Component {
 			rows: parseInt(this.props.configuration.portletInstance.rows),
 			arrows: false,
 			slidesToShow: this.getNumSlides(),
-			slidesToScroll: 1,
+			slidesToScroll: 1
 		};
 
 		const popup_settings = {
