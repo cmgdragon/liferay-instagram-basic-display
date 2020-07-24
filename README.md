@@ -38,3 +38,6 @@ You can add the id and token in the system settings and those will be used by de
 
 #### Responsive behavior
 The carousel should automatically adapt to the width of the layout where it is placed, and also resize when the screen changes its width. No responsive configuration needed.
+
+
+![ssajsa](https://github.com/cmgdragon/liferay-instagram-basic-display/blob/master/images/example.PNG?raw=true)
