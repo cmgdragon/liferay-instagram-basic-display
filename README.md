@@ -4,12 +4,13 @@ A Liferay React widget that shows the last media uploaded to an Instagram accoun
 
 ## Requeriments
 - A Liferay 7.2 or 7.3 instance.
-- Access to the Instagram Basic Display API. You will need a token and an Instragram user ID. Follow [the documentation](https://developers.facebook.com/docs/instagram-basic-display-api/getting-started "the documentation").
+- Access to the Instagram Basic Display API. You will need a token and an Instragram user ID. Follow [the documentation](https://developers.facebook.com/docs/instagram-basic-display-api/getting-started "the documentation"), or use a [third-party library](https://github.com/espresso-dev/instagram-basic-display-php "third-party library").
 - [Slick carousel](https://github.com/kenwheeler/slick "Slick carousel") loaded in your theme/page.
 - [JQuery](https://code.jquery.com/ "JQuery") included in your theme/page (only for 7.3+, that it is not included by default anymore)
+> you could also include the last two assets directly using the web context path of you application `/o/[web-context]/[resource]`, but it is not implemented here.
 
 ## Installation
-1. Download the .jar located in ./dist, or clone this repo and run `npm run build`.
+1. Download the .jar located in ./dist, or clone this repo and run `npm install` & `npm run build`.
 1. Copy the .jar file into the ${liferayHome}/**deploy** folder of your Liferay instance.
 1. Add the portlet into your page. It will be in the **Sample** category unless you change it.
 1. Configure the portlet
@@ -35,5 +36,5 @@ You can add the id and token in the system settings and those will be used by de
 - **Font Size** - Size of the captions
 - **Debounce responsive** - Lapsus in seconds in which the component can resize its with again
 
-#### Component responsiveness
-The carousel should automatically adapt to the width of the layout where it is placed, and also resize when the screen changes its width.
+#### Responsive behavior
+The carousel should automatically adapt to the width of the layout where it is placed, and also resize when the screen changes its width. No responsive configuration needed.

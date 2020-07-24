@@ -20,6 +20,13 @@ export default function main({portletNamespace, contextPath, portletElementId, c
         ReactDOM.render(<span>Please, configure and save the portlet to make it work</span>,
             document.getElementById(portletElementId));
 
+
+    } else if ( ( (JSON.stringify(configuration.system) === '{}') || configuration.system.userid == "" || configuration.system.token == "" ) &&
+            (configuration.portletInstance.userid == "" || configuration.portletInstance.token == "" )) {
+
+        ReactDOM.render(<span>Please, specify both, a valid user ID and token</span>,
+            document.getElementById(portletElementId));     
+
     } else {
 
         ReactDOM.render(

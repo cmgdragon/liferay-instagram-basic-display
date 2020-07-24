@@ -1,6 +1,7 @@
 import React from 'react';
 import 'babel-polyfill';
 import CssInclude from './CssInclude';
+import ReactDOM from 'react-dom';
 
 const API_HOST = "https://graph.instagram.com/";
 const ENDPOINT_MEDIA = "/media";
@@ -36,7 +37,6 @@ export default class extends React.Component {
 		super(props);
 		this.state = {
 			fotos: cached_response.feed[this.props.configuration.portletInstance.token || this.props.configuration.portletInstance.token] !== undefined ? cached_response.feed[this.props.configuration.system.token || this.props.configuration.system.token] : undefined,
-			slides: "2",
 			popup_open: false,
 			album: {},
 			elementWidth: document.getElementById(this.props.portletElementId).offsetWidth
@@ -184,14 +184,20 @@ export default class extends React.Component {
 	}
 
 	componentDidMount() {
-		
-		const getInstagramPosts = async () => {
 
+		const getInstagramPosts = async () => {
 
 			if (JSON.stringify(cached_response.feed) === "{}") {
 
 				const response = await fetch(`${API_HOST}${this.props.configuration.portletInstance.userid === "" ? this.props.configuration.system.userid : this.props.configuration.portletInstance.userid}${ENDPOINT_MEDIA}?fields=${FIELDS_MEDIA}&access_token=${this.props.configuration.portletInstance.token === "" ? this.props.configuration.system.token : this.props.configuration.portletInstance.token}`
 				);
+
+				if (!response.ok) {
+					ReactDOM.render(<span>Invalid API credentials</span>,
+						document.getElementById(this.props.portletElementId));
+					return;
+				}
+
 				const fotos = await response.json();
 				
 				cached_response.feed[this.props.configuration.portletInstance.token || this.props.configuration.system.token] = fotos.data;		
@@ -279,7 +285,8 @@ export default class extends React.Component {
 		else if (!!document.querySelector(`#${this.props.portletElementId} #instagram-album-slick`) && !document.querySelector(`#${this.props.portletElementId} #instagram-album-popup`).classList.contains('instagram-album-carousel-show') && document.getElementById('instagram-album-slick').classList.contains('slick-initialized'))
 			document.querySelector(`#${this.props.portletElementId} #instagram-album-carousel`).remove();
 
-		$(`#${this.props.portletElementId} #instagram-content [data-slick]`).not('.slick-initialized').slick();
+		if (!!document.querySelector(`#${this.props.portletElementId} #instagram-content [data-slick]`))
+			$(`#${this.props.portletElementId} #instagram-content [data-slick]`).not('.slick-initialized').slick();
 
 	}
 
